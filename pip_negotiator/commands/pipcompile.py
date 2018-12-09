@@ -15,6 +15,10 @@ __email__ = "mail@giuseppechiesa.it"
 __status__ = "PerpetualBeta"
 
 
+class PipCompileException(Exception):
+    pass
+
+
 class PipCompile(ShellCommand):
     COMMAND = 'pip-compile'
     ARGS = '-U'
@@ -33,9 +37,9 @@ class PipCompile(ShellCommand):
             result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.COMMAND, a=arguments)))
             self.logger.debug('Result from command {c} with args {a}: {r}'.format(c=self.COMMAND,
                                                                                   a=arguments, r=result))
-        except CalledProcessError:
-            self.logger.error('Error while calling process {c} with args: {a}'.format(c=self.COMMAND, a=self.ARGS))
-            raise
+        except CalledProcessError as e:
+            self.logger.error('Error while calling: {p}'.format(p=e.cmd))
+            raise PipCompileException(e.output)
         self._result = result
         return self
 

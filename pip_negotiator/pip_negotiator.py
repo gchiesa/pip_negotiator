@@ -6,6 +6,7 @@ import sys
 
 from . import __application__, __version__
 from .commands import PipCompile, PipInventory
+from .commands.pipcompile import PipCompileException
 from .requirements import Requirements
 
 __author__ = "Giuseppe Chiesa"
@@ -43,7 +44,12 @@ def configure_logging(level):
                 'level': level.upper(),
                 'handlers': ['console'],
                 'propagate': False
-            }
+            },
+            'pip._vendor.cachecontrol.controller': {
+                'level': level.upper(),
+                'handlers': ['console'],
+                'propagate': False
+            },
         },
         'root': {
             'level': level.upper(),
@@ -81,8 +87,15 @@ def main():
 
     total_requirements = Requirements([curr_requirements.to_catalog(), new_requirements.to_catalog()])
 
-    pip_compile = PipCompile(total_requirements.to_catalog())
-    pip_compile.execute()
+    try:
+        pip_compile = PipCompile(total_requirements.to_catalog())
+        pip_compile.execute()
+    except PipCompileException as e:
+        sys.stderr.write(e.message)
+        sys.exit(1)
+    except Exception as e:
+        sys.stderr.write(e.message)
+        sys.exit(2)
 
     sys.stdout.write(pip_compile.result)
 

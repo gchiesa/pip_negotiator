@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 import json
+import os
 import shlex
 import subprocess
 import tempfile
 from subprocess import CalledProcessError
-from ..requirements import Requirements
+
 from .base import ShellCommand
+from ..requirements import Requirements
 
 __author__ = "Giuseppe Chiesa"
 __copyright__ = "Copyright 2017, Giuseppe Chiesa"
@@ -28,13 +30,16 @@ class PipInventory(ShellCommand):
             self._exclusions = [elem.lower().strip() for elem in exclusions]
 
     def execute(self):
+        devnull = open(os.devnull, 'w')
         try:
-            result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.COMMAND, a=self.ARGS)))
+            result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.COMMAND, a=self.ARGS)), stderr=devnull)
             self.logger.debug('Result from command {c} with args {a}: {r}'.format(c=self.COMMAND,
                                                                                   a=self.ARGS, r=result))
-        except CalledProcessError:
-            self.logger.error('Error while calling process {c} with args: {a}'.format(c=self.COMMAND, a=self.ARGS))
+        except CalledProcessError as e:
+            self.logger.error('Error while calling: {p}'.format(p=e.cmd))
             raise
+        finally:
+            devnull.close()
         self._result = result
         return self
 
