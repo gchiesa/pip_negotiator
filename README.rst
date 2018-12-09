@@ -26,7 +26,19 @@ A simple tool with the goal to  keep your pip packages without conflicts
 Features
 --------
 
-* TODO
+Pip Negotiator, read your requirements.txt file and create a new set of pinned requirements without conflicts with the
+already existing packages.
+
+Usage::
+
+    pip-negotiator requirements.txt
+
+Help::
+
+    pip-negotiator --help
+
+
+
 
 Credits
 -------
