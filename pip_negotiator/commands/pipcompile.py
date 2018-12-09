@@ -21,7 +21,7 @@ class PipCompileException(Exception):
 
 class PipCompile(ShellCommand):
     COMMAND = 'pip-compile'
-    ARGS = '-U'
+    ARGS = '-U -v'
 
     def __init__(self, requirements):
         super(PipCompile, self).__init__()
@@ -35,8 +35,8 @@ class PipCompile(ShellCommand):
                                             r=self._requirements)
         try:
             result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.COMMAND, a=arguments)))
-            self.logger.debug('Result from command {c} with args {a}: {r}'.format(c=self.COMMAND,
-                                                                                  a=arguments, r=result))
+            self.logger.debug('Result from command {c} with args {a}: \n---{r}\n---\n'.format(c=self.COMMAND,
+                                                                                              a=arguments, r=result))
         except CalledProcessError as e:
             self.logger.error('Error while calling: {p}'.format(p=e.cmd))
             raise PipCompileException(e.output)
