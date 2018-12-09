@@ -22,16 +22,11 @@ setup(
     author="Giuseppe Chiesa",
     author_email='mail@giuseppechiesa.it',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
     description="A simple tool with the goal to  keep your pip packages without conflicts",
@@ -48,4 +43,10 @@ setup(
     url='https://github.com/gchiesa/pip_negotiator',
     version='0.1.0',
     zip_safe=False,
+    entry_points={
+        'console_scripts': [
+            'pip-negotiator = pip_negotiator.pip_negotiator:main',
+            'pip_negotiator = pip_negotiator.pip_negotiator:main',
+        ]
+    }
 )

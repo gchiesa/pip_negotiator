@@ -1,8 +1,12 @@
 #!/usr/bin/env python
+import argparse
 import logging
-import subprocess
-import abc
-from . import __application__
+import logging.config
+import sys
+
+from . import __application__, __version__
+from .commands import PipCompile, PipInventory
+from .requirements import Requirements
 
 __author__ = "Giuseppe Chiesa"
 __copyright__ = "Copyright 2017, Giuseppe Chiesa"
@@ -13,26 +17,74 @@ __email__ = "mail@giuseppechiesa.it"
 __status__ = "PerpetualBeta"
 
 
-class ShellCommand(object):
-    def __init__(self):
-        self.logger = logging.getLogger('{a}.{c}'.format(a=__application__, c=self.__class__.__name__))
+def configure_logging(level):
+    """
+    Configure the logging level of the tool
+    :param level: level to set
+    :return:
+    """
+    dconfig = {
+        'version': 1,
+        'formatters': {
+            'simple': {
+                'format': '[%(name)s] [%(levelname)s] : %(message)s'
+            }
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'level': level.upper(),
+                'formatter': 'simple',
+                'stream': 'ext://sys.stdout'
+            }
+        },
+        'loggers': {
+            __application__: {
+                'level': level.upper(),
+                'handlers': ['console'],
+                'propagate': False
+            }
+        },
+        'root': {
+            'level': level.upper(),
+            'handlers': ['console']
+        }
+    }
+    logging.config.dictConfig(dconfig)
 
 
-
-class PipInventory(object):
-    pass
-
-
-class PipCompile(object):
-    pass
-
-
-def create_inventory_base():
-    pass
+def check_args():
+    parser = argparse.ArgumentParser(prog=__application__)
+    parser.add_argument('--version', action='version', version='%(prog)s {}'.format(__version__))
+    parser.add_argument('-L', '--log-level', dest='log_level', required=False,
+                        help='Log level to set',
+                        choices=['debug', 'info', 'warning', 'error'],
+                        default='info')
+    parser.add_argument('-e', '--exclusions',
+                        help='Comma separated list of exclusions',
+                        dest='exclusions',
+                        default='')
+    parser.add_argument('requirements', nargs='+',
+                        help='Requirement files to process')
+    return parser.parse_args()
 
 
 def main():
-    pass
+    args = check_args()
+    configure_logging(args.log_level)
+
+    pip_inventory = PipInventory(args.exclusions.split(','))
+    pip_inventory.execute()
+
+    curr_requirements = pip_inventory.to_requirements()
+    new_requirements = Requirements(args.requirements)
+
+    total_requirements = Requirements([curr_requirements.to_catalog(), new_requirements.to_catalog()])
+
+    pip_compile = PipCompile(total_requirements.to_catalog())
+    pip_compile.execute()
+
+    sys.stdout.write(pip_compile.result)
 
 
 if __name__ == '__main__':
