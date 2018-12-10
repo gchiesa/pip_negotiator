@@ -31,28 +31,36 @@ class PipInventory(ShellCommand):
 
     def execute(self):
         devnull = open(os.devnull, 'w')
+        self._result = []
         try:
-            result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.COMMAND, a=self.ARGS)), stderr=devnull)
-            self.logger.debug('Result from command {c} with args {a}: {r}'.format(c=self.COMMAND,
-                                                                                  a=self.ARGS, r=result))
+            for req_type in ['-o', '-u']:
+                arguments = '{a} {t}'.format(a=self.ARGS, t=req_type)
+                result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.COMMAND, a=arguments)),
+                                                 stderr=devnull)
+                self.logger.debug('Result from command {c} with args {a}: {r}'.format(c=self.COMMAND,
+                                                                                      a=arguments, r=result))
+                self._result.extend(self._parse_json(result))
         except CalledProcessError as e:
             self.logger.error('Error while calling: {p}'.format(p=e.cmd))
             raise
         finally:
             devnull.close()
-        self._result = result
+
         return self
+
+    @staticmethod
+    def _parse_json(data):
+        try:
+            result = json.loads(data)
+        except TypeError as e:
+            raise
+        return result
 
     @property
     def result(self):
-        if self._data:
-            return self._data
-        try:
-            self._data = json.loads(self._result)
-        except TypeError:
-            self.logger.error('Result is not valid. Actual content: {}'.format(self._result))
-            return None
-        return self._data
+        if not self._result:
+            self.execute()
+        return self._result
 
     @property
     def inventory(self):

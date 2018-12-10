@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import shlex
 import subprocess
 import tempfile
@@ -30,16 +31,19 @@ class PipCompile(ShellCommand):
         self._tmp.close()
 
     def execute(self):
+        devnull = open(os.devnull, 'w')
         arguments = '{a} -o {o} {r}'.format(a=self.ARGS,
                                             o=self._tmp.name,
                                             r=self._requirements)
         try:
-            result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.COMMAND, a=arguments)))
+            result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.COMMAND, a=arguments)), stderr=devnull)
             self.logger.debug('Result from command {c} with args {a}: \n---{r}\n---\n'.format(c=self.COMMAND,
                                                                                               a=arguments, r=result))
         except CalledProcessError as e:
             self.logger.error('Error while calling: {p}'.format(p=e.cmd))
             raise PipCompileException(e.output)
+        finally:
+            devnull.close()
         self._result = result
         return self
 
