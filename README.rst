@@ -37,7 +37,7 @@ is a new output (requirements.txt format) that can be used with pip
 
 Usage::
 
-    pip-negotiator requirements.txt > resolved_requirements.txt
+    pip-negotiator -o resolved_requirements.txt requirements.txt
     pip install -U resolved_requirements.txt
 
 In case there is an error and the requirements cannot be resolved, use the debug mode to get an extensive analysis::

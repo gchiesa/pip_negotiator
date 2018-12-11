@@ -66,6 +66,10 @@ def check_args():
                         help='Log level to set',
                         choices=['debug', 'info', 'warning', 'error'],
                         default='info')
+    parser.add_argument('-o', '--output',
+                        help='Output file',
+                        dest='output_file',
+                        default=None)
     parser.add_argument('-e', '--exclusions',
                         help='Comma separated list of exclusions',
                         dest='exclusions',
@@ -97,7 +101,11 @@ def main():
         sys.stderr.write(e.message)
         sys.exit(2)
 
-    sys.stdout.write(pip_compile.result)
+    if args.output_file:
+        with open(args.output_file, 'wb') as fh:
+            fh.write(pip_compile.result)
+    else:
+        sys.stdout.write(pip_compile.result)
 
 
 if __name__ == '__main__':
