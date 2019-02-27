@@ -4,5 +4,5 @@
 
 __author__ = """Giuseppe Chiesa"""
 __email__ = 'peppe@surepay.nl'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __application__ = 'pip_negotiator'
