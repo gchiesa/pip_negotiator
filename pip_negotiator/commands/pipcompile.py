@@ -22,7 +22,7 @@ class PipCompileException(Exception):
 
 class PipCompile(ShellCommand):
     COMMAND = 'pip-compile'
-    ARGS = '-U -v'
+    ARGS = '--rebuild -U -v'
 
     def __init__(self, requirements):
         super(PipCompile, self).__init__()
