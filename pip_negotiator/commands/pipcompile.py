@@ -21,8 +21,8 @@ class PipCompileException(Exception):
 
 
 class PipCompile(ShellCommand):
-    COMMAND = 'pip-compile'
-    ARGS = '--rebuild -U -v'
+    command = 'pip-compile'
+    args = '--rebuild -U -v'
 
     def __init__(self, requirements):
         super(PipCompile, self).__init__()
@@ -31,12 +31,12 @@ class PipCompile(ShellCommand):
         self._tmp.close()
 
     def execute(self):
-        arguments = '{a} -o {o} {r}'.format(a=self.ARGS,
+        arguments = '{a} -o {o} {r}'.format(a=self.args,
                                             o=self._tmp.name,
                                             r=self._requirements)
         try:
-            result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.COMMAND, a=arguments)))
-            self.logger.debug('Result from command {c} with args {a}: \n---{r}\n---\n'.format(c=self.COMMAND,
+            result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.resolve_command(), a=arguments)))
+            self.logger.debug('Result from command {c} with args {a}: \n---{r}\n---\n'.format(c=self.resolve_command(),
                                                                                               a=arguments, r=result))
         except CalledProcessError as e:
             self.logger.error('Error while calling: {p}'.format(p=e.cmd))

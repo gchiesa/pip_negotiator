@@ -19,8 +19,8 @@ __status__ = "PerpetualBeta"
 
 
 class PipInventory(ShellCommand):
-    COMMAND = 'pip'
-    ARGS = 'list --format=json'
+    command = 'pip'
+    args = 'list --format=json'
 
     def __init__(self, exclusions=None):
         super(PipInventory, self).__init__()
@@ -34,10 +34,10 @@ class PipInventory(ShellCommand):
         self._result = []
         try:
             for req_type in ['-o', '-u']:
-                arguments = '{a} {t}'.format(a=self.ARGS, t=req_type)
-                result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.COMMAND, a=arguments)),
+                arguments = '{a} {t}'.format(a=self.args, t=req_type)
+                result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.resolve_command(), a=arguments)),
                                                  stderr=devnull)
-                self.logger.debug('Result from command {c} with args {a}: {r}'.format(c=self.COMMAND,
+                self.logger.debug('Result from command {c} with args {a}: {r}'.format(c=self.resolve_command(),
                                                                                       a=arguments, r=result))
                 self._result.extend(self._parse_json(result))
         except CalledProcessError as e:

@@ -2,7 +2,7 @@
 import abc
 import logging
 import logging.config
-
+import os
 from .. import __application__
 
 __author__ = "Giuseppe Chiesa"
@@ -30,3 +30,16 @@ class ShellCommand:
     @abc.abstractmethod
     def result(self):
         raise RuntimeError('Not Implemented')
+
+    @property
+    @abc.abstractmethod
+    def command(self):
+        raise RuntimeError('Not Implemented')
+
+    def resolve_command(self):
+        if os.environ.get('VIRTUAL_ENV', None):
+            self.logger.debug('Using virtualenv: {}'.format(os.environ['VIRTUAL_ENV']))
+            return '{venv}/bin/{command}'.format(venv=os.environ['VIRTUAL_ENV'], command=self.command)
+        self.logger.debug('Virtualenv not detected')
+        return self.command
+
