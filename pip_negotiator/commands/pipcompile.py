@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-import os
 import shlex
 import subprocess
 import tempfile
 from subprocess import CalledProcessError
+
+import six
 
 from .base import ShellCommand
 
@@ -27,15 +28,19 @@ class PipCompile(ShellCommand):
     def __init__(self, requirements):
         super(PipCompile, self).__init__()
         self._requirements = requirements
-        self._tmp = tempfile.NamedTemporaryFile(delete=False)
+        self._tmp = tempfile.NamedTemporaryFile(mode='w', delete=False)
         self._tmp.close()
 
     def execute(self):
         arguments = '{a} -o {o} {r}'.format(a=self.args,
                                             o=self._tmp.name,
                                             r=self._requirements)
+        kwargs = {}
+        if six.PY3:
+            kwargs.update({'text': True})
         try:
-            result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.resolve_command(), a=arguments)))
+            result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.resolve_command(), a=arguments)),
+                                             **kwargs)
             self.logger.debug('Result from command {c} with args {a}: \n---{r}\n---\n'.format(c=self.resolve_command(),
                                                                                               a=arguments, r=result))
         except CalledProcessError as e:
@@ -48,4 +53,5 @@ class PipCompile(ShellCommand):
     def result(self):
         with open(self._tmp.name, 'rb') as fh:
             data = fh.readlines()
-        return '\n'.join([line.strip() for line in data if not line.startswith('#')])
+        return '\n'.join([line.decode().strip() for line in data
+                          if not line.decode().startswith('#')])

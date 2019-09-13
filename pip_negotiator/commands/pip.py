@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+from __future__ import unicode_literals
 import json
 import os
 import shlex
 import subprocess
+import six
 import tempfile
 from subprocess import CalledProcessError
 
@@ -35,8 +37,11 @@ class PipInventory(ShellCommand):
         try:
             for req_type in ['-o', '-u']:
                 arguments = '{a} {t}'.format(a=self.args, t=req_type)
+                kwargs = {'stderr': devnull, }
+                if six.PY3:
+                    kwargs.update({'text': True})
                 result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.resolve_command(), a=arguments)),
-                                                 stderr=devnull)
+                                                 **kwargs)
                 self.logger.debug('Result from command {c} with args {a}: {r}'.format(c=self.resolve_command(),
                                                                                       a=arguments, r=result))
                 self._result.extend(self._parse_json(result))
@@ -68,7 +73,8 @@ class PipInventory(ShellCommand):
         return [elem['name'] for elem in self.result if elem['name'].lower() not in self._exclusions]
 
     def to_requirements(self):
-        tmp = tempfile.NamedTemporaryFile(delete=False)
-        tmp.write('\n'.join(self.inventory))
+        tmp = tempfile.NamedTemporaryFile(mode='wb', delete=False)
+        data = '\n'.join(self.inventory)
+        tmp.write(data.encode())
         tmp.close()
         return Requirements([tmp.name])

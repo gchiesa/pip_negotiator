@@ -19,7 +19,8 @@ class Requirements(object):
         self.file = tempfile.NamedTemporaryFile(delete=False)
         for f in self._files:
             with open(f, 'rb') as fh:
-                data = fh.read().strip()
-                self.file.write('{}\n'.format(data))
+                input_data = fh.read().decode().strip()
+                output_data = '{}\n'.format(input_data)
+                self.file.write(output_data.encode())
         self.file.close()
         return self.file.name

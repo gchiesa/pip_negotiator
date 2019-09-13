@@ -95,14 +95,14 @@ def main():
         pip_compile = PipCompile(total_requirements.to_catalog())
         pip_compile.execute()
     except PipCompileException as e:
-        sys.stderr.write(e.message)
+        sys.stderr.write(str(e))
         sys.exit(1)
     except Exception as e:
-        sys.stderr.write(e.message)
+        sys.stderr.write(str(e))
         sys.exit(2)
 
     if args.output_file:
-        with open(args.output_file, 'wb') as fh:
+        with open(args.output_file, 'w') as fh:
             fh.write(pip_compile.result)
     else:
         sys.stdout.write(pip_compile.result)
