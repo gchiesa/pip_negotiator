@@ -39,7 +39,7 @@ class PipInventory(ShellCommand):
                 arguments = '{a} {t}'.format(a=self.args, t=req_type)
                 kwargs = {'stderr': devnull, }
                 if six.PY3:
-                    kwargs.update({'text': True})
+                    kwargs.update({'encoding': 'utf-8'})
                 result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.resolve_command(), a=arguments)),
                                                  **kwargs)
                 self.logger.debug('Result from command {c} with args {a}: {r}'.format(c=self.resolve_command(),

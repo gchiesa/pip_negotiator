@@ -37,7 +37,7 @@ class PipCompile(ShellCommand):
                                             r=self._requirements)
         kwargs = {}
         if six.PY3:
-            kwargs.update({'text': True})
+            kwargs.update({'encoding': 'utf-8'})
         try:
             result = subprocess.check_output(shlex.split('{c} {a}'.format(c=self.resolve_command(), a=arguments)),
                                              **kwargs)
